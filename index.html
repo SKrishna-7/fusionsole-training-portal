@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fusionsole · Footwear Manufacturing Learning Platform</title>
+  <meta name="description" content="Building knowledge, developing skills and creating a workplace where every individual understands the value of their contribution at Fusionsole.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" type="image/png" href="/images/fusionsole-logo.png">
+</head>
+<body>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 1: NAVIGATION HEADER                             -->
+  <!-- ========================================================= -->
+  <header class="site-header" id="header">
+    <div class="container header-container">
+      <div class="logo-area">
+        <a href="/" class="brand-logo" aria-label="Fusionsole Home">
+          <img src="/images/fusionsole-logo.png" alt="Fusionsole Logo" class="brand-logo-img">
+        </a>
+      </div>
+
+      <nav class="main-navigation" aria-label="Main Navigation">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="/#about" class="nav-link">About Us</a></li>
+          <li class="nav-item"><a href="/learning" class="nav-link">Learning Centre</a></li>
+          <li class="nav-item"><a href="/#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <a href="/admin/login" class="btn btn-primary btn-sm login-btn">Log in</a>
+        <button class="mobile-toggle" aria-label="Toggle navigation menu" id="mobileMenuBtn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- MAIN CONTENT CONTAINER (HOME & LEARNING CENTRE VIEWS)     -->
+  <!-- ========================================================= -->
+  <main id="main-content">
+    
+    <!-- View 1: Homepage -->
+    <div id="home-view">
+      <!-- SECTION 2: HERO SECTION -->
+      <section class="hero-section" id="hero">
+        <div class="container hero-container">
+          <div class="hero-left">
+            <div class="hero-pill-badge">
+              <span>FUSIONSOLE · FOOTWEAR MANUFACTURING</span>
+            </div>
+
+            <h1 class="hero-headline">
+              Crafting Quality<br>
+              Begins With Skilled<br>
+              People.
+            </h1>
+
+            <p class="hero-description">
+              Every great product begins with people who understand their work. At Fusionsole, we believe in building knowledge, developing skills and creating a workplace where every individual understands the value of their contribution.
+            </p>
+
+            <div class="hero-button-group">
+              <a href="/learning" class="btn btn-primary hero-primary-btn">
+                <span>Explore Learning Centre</span>
+                <span class="btn-icon-circle">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9L9 3M9 3H4.5M9 3V7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </a>
+              <a href="#about" class="btn btn-outline hero-secondary-btn">Discover Fusionsole</a>
+            </div>
+
+        <div class="hero-audiences-row">
+          <div class="audience-item">
+            <svg class="audience-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M16 17v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 15.5V17" stroke-linecap="round"/>
+              <circle cx="10" cy="6.5" r="3.5"/>
+            </svg>
+            <span>Staff Induction</span>
+          </div>
+
+          <div class="audience-item">
+            <svg class="audience-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M14 16v-1a3 3 0 0 0-2.5-2.95M11.5 5.2a3 3 0 0 1 0 4.6" stroke-linecap="round"/>
+              <path d="M11 16v-1.5a3 3 0 0 0-3-3H4a3 3 0 0 0-3 3V16" stroke-linecap="round"/>
+              <circle cx="6" cy="6.5" r="3"/>
+            </svg>
+            <span>Production Workers</span>
+          </div>
+
+          <div class="audience-item">
+            <svg class="audience-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M3 17V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v13M3 17h14M11 17V8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 6h2M6 9h2M6 12h2M14 10h1M14 13h1"/>
+            </svg>
+            <span>Manufacturing Standards</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-image-stack">
+          <div class="hero-img-wrapper hero-img-top">
+            <img src="/images/fusion-stitching.jpg" alt="Footwear upper stitching operation on industrial machinery at Fusionsole" loading="eager" />
+          </div>
+          <div class="hero-img-wrapper hero-img-bottom">
+            <img src="/images/fusion-lasting.jpg" alt="Craftsman hand applying adhesive and lasting sole components at Fusionsole" loading="eager" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 3: MANUFACTURING PROCESS STRIP                    -->
+  <!-- ========================================================= -->
+  <section class="brand-logos-section">
+    <div class="container">
+      <div class="process-track">
+        <div class="process-step-item">
+          <span class="process-step-num">01</span>
+          <span class="process-step-label">CUTTING</span>
+        </div>
+
+        <span class="process-divider">→</span>
+
+        <div class="process-step-item">
+          <span class="process-step-num">02</span>
+          <span class="process-step-label">STITCHING</span>
+        </div>
+
+        <span class="process-divider">→</span>
+
+        <div class="process-step-item">
+          <span class="process-step-num">03</span>
+          <span class="process-step-label">LASTING</span>
+        </div>
+
+        <span class="process-divider">→</span>
+
+        <div class="process-step-item">
+          <span class="process-step-num">04</span>
+          <span class="process-step-label">FINISHING &amp; PACKING</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 4: INTRODUCTION SECTION                           -->
+  <!-- ========================================================= -->
+  <section class="solutions-section" id="about">
+    <div class="container">
+      <div class="section-header-centered">
+        <h2 class="section-title">Where People, Process and<br>Quality Come Together.</h2>
+        <p class="section-subtitle">
+          From the first step of induction to understanding department-specific processes, learning helps every team member become familiar with the work they do and the standards we follow.
+        </p>
+      </div>
+
+      <div class="two-cards-grid">
+        <!-- Card 1 -->
+        <div class="feature-card">
+          <div class="feature-card-content">
+            <h3 class="feature-card-title">Understanding Fusionsole</h3>
+            <p class="feature-card-text">
+              Get introduced to our company, workplace environment and the principles that guide our everyday operations.
+            </p>
+            <p class="feature-card-text">
+              Learn how our manufacturing standards, safety protocols, and mutual respect empower team members across every facility to achieve excellence together.
+            </p>
+          </div>
+          <div class="feature-card-footer">
+            <a href="#about" class="btn btn-pill-outline">
+              <span>Learn About Us</span>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="6.5"/>
+                <path d="M8 5v6M5 8h6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="feature-card">
+          <div class="feature-card-content">
+            <h3 class="feature-card-title">Learning Through Every Process</h3>
+            <p class="feature-card-lead">
+              Explore the different stages of footwear manufacturing and understand the skills and responsibilities involved in each department:
+            </p>
+            <ul class="feature-bullet-list">
+              <li>
+                <span class="bullet-dot">•</span>
+                <span>Material preparation and precision component cutting.</span>
+              </li>
+              <li>
+                <span class="bullet-dot">•</span>
+                <span>Upper assembly, reinforcement, and detailed stitching.</span>
+              </li>
+              <li>
+                <span class="bullet-dot">•</span>
+                <span>Sole shaping, lasting structure, and final packaging.</span>
+              </li>
+            </ul>
+          </div>
+          <div class="feature-card-footer">
+            <a href="#learning-centre" class="btn btn-primary">Explore Departments</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 5: PROFESSIONAL DEVELOPMENT (ROLE LEARNING)        -->
+  <!-- ========================================================= -->
+  <section class="prof-programs-section" id="learning-centre">
+    <div class="container">
+      <div class="section-header-left">
+        <h2 class="section-title">Learning Designed Around<br>Every Role</h2>
+        <p class="section-subtitle-left">Different responsibilities require different knowledge. Explore the learning programmes designed for Fusionsole employees.</p>
+      </div>
+
+      <div class="accordion-layout-grid">
+        <!-- Left: Accordion list -->
+        <div class="programs-accordion-list" id="programAccordion">
+          <div class="accordion-item active" data-program="induction">
+            <span class="accordion-label">Staff Induction</span>
+            <div class="accordion-icon-circle">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="6.5"/>
+                <path d="M6.5 8h3M8 6.5l1.5 1.5L8 9.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="accordion-item" data-program="cutting">
+            <span class="accordion-label">Cutting Department</span>
+            <div class="accordion-icon-circle">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="6.5"/>
+                <path d="M6.5 8h3M8 6.5l1.5 1.5L8 9.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="accordion-item" data-program="stitching">
+            <span class="accordion-label">Stitching Department</span>
+            <div class="accordion-icon-circle">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="6.5"/>
+                <path d="M6.5 8h3M8 6.5l1.5 1.5L8 9.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="accordion-item" data-program="lasting">
+            <span class="accordion-label">Lasting Department</span>
+            <div class="accordion-icon-circle">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="6.5"/>
+                <path d="M6.5 8h3M8 6.5l1.5 1.5L8 9.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="accordion-item" data-program="finishing">
+            <span class="accordion-label">Finishing &amp; Packing</span>
+            <div class="accordion-icon-circle">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                <circle cx="8" cy="8" r="6.5"/>
+                <path d="M6.5 8h3M8 6.5l1.5 1.5L8 9.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Detail panel with image -->
+        <div class="program-detail-card" id="programDetail">
+          <div class="program-detail-media">
+            <img id="programImage" src="/images/fusion-moulds.jpg" alt="Fusionsole manufacturing department training environment" />
+          </div>
+          <div class="program-detail-content">
+            <h3 class="program-detail-title" id="programTitle">Staff Induction</h3>
+            <p class="program-detail-desc" id="programDesc">
+              An introduction to Fusionsole, the workplace environment, company practices and essential information for newly joined staff.
+            </p>
+            <div class="program-detail-action">
+              <a href="#learning-centre" class="btn btn-outline-sm">Learn more</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 6: LEARNING PATHWAYS SECTION                      -->
+  <!-- ========================================================= -->
+  <section class="programs-grid-section" id="pathways">
+    <div class="container">
+      <div class="section-header-centered">
+        <h2 class="section-title">Explore Your Learning Pathway</h2>
+        <p class="section-subtitle">Start with the learning programme that matches your role and responsibilities.</p>
+      </div>
+
+      <div class="workforce-grid two-cards-pathway">
+        <!-- Card 1: Staff -->
+        <div class="program-card">
+          <div class="program-card-header">
+            <span class="tag tag-blue">STAFF PROGRAMME</span>
+            <h3 class="program-card-title">Staff Induction</h3>
+          </div>
+          <p class="program-card-body">
+            Get familiar with Fusionsole, understand the workplace environment and learn the essential information needed to begin your journey with the company.
+          </p>
+          <div class="program-card-footer">
+            <a href="#staff-induction" class="btn btn-outline-sm">Explore Induction</a>
+          </div>
+        </div>
+
+        <!-- Card 2: Workers -->
+        <div class="program-card">
+          <div class="program-card-header">
+            <span class="tag tag-green">WORKER PROGRAMME</span>
+            <h3 class="program-card-title">Department Training</h3>
+          </div>
+          <p class="program-card-body">
+            Explore training programmes across the key stages of footwear manufacturing and understand the processes followed within each department.
+          </p>
+          <div class="program-card-footer">
+            <a href="#department-training" class="btn btn-outline-sm">Explore Training</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 7: ONE PLATFORM, DIFFERENT PATHS (STATISTICS REPL)-->
+  <!-- ========================================================= -->
+  <section class="stats-section" id="platform-overview">
+    <div class="container stats-container">
+      <div class="stats-left">
+        <h2 class="stats-headline">
+          One Learning Platform.<br>
+          Different Learning Paths.
+        </h2>
+        <p class="stats-description">
+          Whether joining as staff or working within a production department, every new team member can access the learning materials relevant to their role.
+        </p>
+      </div>
+
+      <div class="stats-right">
+        <div class="stats-grid pathway-highlights-grid">
+          <div class="stat-box pathway-highlight-box">
+            <div class="stat-highlight-tag">STAFF</div>
+            <div class="stat-highlight-title">Company Induction</div>
+            <div class="stat-highlight-desc">Orientation, workplace culture and foundational company practices for newly joined personnel.</div>
+          </div>
+          <div class="stat-box pathway-highlight-box">
+            <div class="stat-highlight-tag">WORKERS</div>
+            <div class="stat-highlight-title">Four Manufacturing Departments</div>
+            <div class="stat-highlight-desc">Dedicated skill development across Cutting, Stitching, Lasting, and Finishing &amp; Packing.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- SECTION 8: FINAL CTA SECTION                              -->
+  <!-- ========================================================= -->
+  <section class="final-cta-section" id="cta-journey">
+    <div class="container">
+      <div class="cta-header-left">
+        <h2 class="cta-headline">
+          Ready to Begin Your Journey at<br>
+          Fusionsole?
+        </h2>
+        <p class="section-subtitle-left cta-desc-sub">
+          Explore the learning materials and training programmes created to help you understand your workplace and your role.
+        </p>
+      </div>
+
+      <div class="cta-cards-row">
+        <!-- CTA Card 1 -->
+        <div class="cta-action-card">
+          <div class="cta-action-text">
+            <h3 class="cta-action-title">Learning Centre</h3>
+            <p class="cta-action-sub">Explore company guides, core workplace standards and induction materials.</p>
+          </div>
+          <div class="cta-action-btn-wrap">
+            <a href="/learning" class="btn btn-primary cta-btn">Go to Learning Centre</a>
+          </div>
+        </div>
+
+        <!-- CTA Card 2 -->
+        <div class="cta-action-card">
+          <div class="cta-action-text">
+            <h3 class="cta-action-title">Department Programmes</h3>
+            <p class="cta-action-sub">Access focused training modules for cutting, stitching, lasting and packing.</p>
+          </div>
+          <div class="cta-action-btn-wrap">
+            <a href="/learning/workers" class="btn btn-primary cta-btn">Explore Training Programmes</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    </div><!-- End #home-view -->
+
+    <!-- View 2: Learning Centre SPA View Container -->
+    <div id="learning-view" class="learning-view" style="display: none;"></div>
+
+    <!-- View 3: Admin CMS Panel View Container -->
+    <div id="admin-view" class="admin-view" style="display: none;"></div>
+
+  </main><!-- End #main-content -->
+
+  <!-- ========================================================= -->
+  <!-- SECTION 9: FOOTER                                         -->
+  <!-- ========================================================= -->
+  <footer class="site-footer" id="contact">
+    <div class="container">
+      <!-- Upper Footer -->
+      <div class="footer-main-grid">
+        <div class="footer-brand-column">
+          <div class="footer-brand-header">
+            <img src="/images/fusionsole-logo-dark.png" alt="Fusionsole Logo" class="footer-logo-img">
+          </div>
+          <p class="footer-statement-fusion">
+            Building knowledge, developing skills and supporting learning across our footwear manufacturing operations.
+          </p>
+        </div>
+
+        <div class="footer-nav-columns footer-nav-single">
+          <div class="footer-nav-col">
+            <h4 class="footer-col-title">Navigation</h4>
+            <ul class="footer-links-list">
+              <li><a href="/">Home</a></li>
+              <li><a href="/#about">About Us</a></li>
+              <li><a href="/learning">Learning Centre</a></li>
+              <li><a href="/learning/staff">Staff Induction</a></li>
+              <li><a href="/learning/workers">Department Training</a></li>
+              <li><a href="/#contact">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mid Footer: Brand & Legal -->
+      <div class="footer-separator"></div>
+
+      <div class="footer-middle-row">
+        <div class="footer-logo-wrap">
+          <span class="footer-brand-name">FUSIONSOLE</span>
+        </div>
+
+        <div class="footer-legal-links">
+          <a href="#terms">Terms Of Use</a>
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#security">Security</a>
+        </div>
+      </div>
+
+      <!-- Bottom Footer: Copyright -->
+      <div class="footer-bottom-row">
+        <span class="copyright-text">Copyright &copy; 2026 Fusionsole. All rights reserved.</span>
+        <span class="design-credit">Footwear Manufacturing Learning Platform</span>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
