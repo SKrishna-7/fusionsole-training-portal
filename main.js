@@ -1409,6 +1409,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const showModal = (user = null) => {
       form.reset();
+      const pwdGroup = document.getElementById('userPasswordGroup');
+      const pwdInput = document.getElementById('userPassword');
       if (user) {
         modalTitle.textContent = 'Edit HR Member: ' + user.full_name;
         document.getElementById('userId').value = user.id;
@@ -1416,10 +1418,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('userEmail').value = user.email;
         document.getElementById('userRole').value = user.role;
         document.getElementById('userIsActive').checked = user.is_active;
+        if (pwdGroup) pwdGroup.style.display = 'none';
+        if (pwdInput) pwdInput.required = false;
       } else {
         modalTitle.textContent = 'Invite HR Member';
         document.getElementById('userId').value = '';
         document.getElementById('userIsActive').checked = true;
+        if (pwdGroup) pwdGroup.style.display = 'block';
+        if (pwdInput) {
+          pwdInput.required = true;
+          pwdInput.value = 'Fusionsole@123';
+        }
       }
       modal.style.display = 'flex';
     };
@@ -1464,13 +1473,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('userId').value;
+      const pwdInput = document.getElementById('userPassword');
       const data = {
         full_name: document.getElementById('userFullName').value.trim(),
         email: document.getElementById('userEmail').value.trim(),
         role: document.getElementById('userRole').value,
         is_active: document.getElementById('userIsActive').checked
       };
-      if (id) data.id = id;
+      if (id) {
+        data.id = id;
+      } else if (pwdInput && pwdInput.value) {
+        data.password = pwdInput.value.trim();
+      }
+
+      const saveBtn = document.getElementById('saveUserBtn');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+      }
 
       try {
         await dbService.saveTeamMember(data);
@@ -1478,6 +1498,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleRoute();
       } catch (err) {
         alert('Error: ' + err.message);
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Account';
+        }
       }
     });
   }

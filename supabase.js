@@ -1244,13 +1244,85 @@ export const dbService = {
     const now = new Date().toISOString();
     if (isLiveConfigured && supabase) {
       if (memberData.id) {
-        const { data, error } = await supabase.from('profiles').update({ ...memberData, updated_at: now }).eq('id', memberData.id).select().single();
+        const { data, error } = await supabase
+          .from('profiles')
+          .update({
+            full_name: memberData.full_name,
+            role: memberData.role,
+            is_active: memberData.is_active,
+            updated_at: now
+          })
+          .eq('id', memberData.id)
+          .select()
+          .single();
         if (error) throw new Error('Failed to update profile: ' + error.message);
         return data;
       } else {
-        const { data, error } = await supabase.from('profiles').insert([{ ...memberData, created_at: now, updated_at: now }]).select().single();
-        if (error) throw new Error('Failed to create profile: ' + error.message);
-        return data;
+        // Step 1: Create user in Supabase Auth using isolated ephemeral client so admin session is NOT replaced
+        const tempClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        });
+
+        const initialPassword = memberData.password || 'Fusionsole@123';
+        const { data: authData, error: authError } = await tempClient.auth.signUp({
+          email: memberData.email,
+          password: initialPassword,
+          options: {
+            data: {
+              full_name: memberData.full_name,
+              role: memberData.role || 'hr_staff'
+            }
+          }
+        });
+
+        if (authError) {
+          throw new Error('Authentication signup error: ' + authError.message);
+        }
+
+        const newUserId = authData?.user?.id;
+        if (!newUserId) {
+          throw new Error('Could not obtain user ID from authentication. If this user is already registered in Supabase, please assign their role in SQL.');
+        }
+
+        // Step 2: Insert into public.profiles with the newly created auth UUID
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .insert([{
+            id: newUserId,
+            full_name: memberData.full_name,
+            email: memberData.email,
+            role: memberData.role || 'hr_staff',
+            is_active: memberData.is_active ?? true,
+            created_at: now,
+            updated_at: now
+          }])
+          .select()
+          .single();
+
+        if (profileError) {
+          // If trigger already created the profile, update it instead
+          if (profileError.code === '23505') {
+            const { data: updatedProfile, error: updateErr } = await supabase
+              .from('profiles')
+              .update({
+                full_name: memberData.full_name,
+                role: memberData.role || 'hr_staff',
+                is_active: memberData.is_active ?? true,
+                updated_at: now
+              })
+              .eq('id', newUserId)
+              .select()
+              .single();
+            if (updateErr) throw new Error('Failed to save profile: ' + updateErr.message);
+            return updatedProfile;
+          }
+          throw new Error('Failed to create profile: ' + profileError.message);
+        }
+        return profileData;
       }
     }
     if (isProduction) {

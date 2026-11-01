@@ -1188,6 +1188,12 @@ export function renderTeamManagement(members) {
             </select>
           </div>
 
+          <div class="form-group" id="userPasswordGroup">
+            <label for="userPassword" class="form-label">Initial Password *</label>
+            <input type="password" id="userPassword" name="password" class="form-input" value="Fusionsole@123" placeholder="••••••••" />
+            <small class="text-xs text-muted" style="display: block; margin-top: 4px;">Initial login password for their portal sign-in (min 6 characters).</small>
+          </div>
+
           <div class="form-group">
             <label class="form-checkbox-label">
               <input type="checkbox" id="userIsActive" name="is_active" checked />
