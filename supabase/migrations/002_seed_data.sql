@@ -123,6 +123,46 @@ ON CONFLICT (slug) DO UPDATE SET
     instructions = EXCLUDED.instructions,
     display_order = EXCLUDED.display_order;
 
+-- 2. Worker Induction
+INSERT INTO public.modules (
+    category_id,
+    subject_id,
+    title,
+    slug,
+    description,
+    overview,
+    learning_objectives,
+    instructions,
+    youtube_url,
+    thumbnail_path,
+    display_order,
+    status
+)
+VALUES (
+    (SELECT id FROM public.categories WHERE slug = 'staff'),
+    NULL,
+    'Worker Induction',
+    'worker-induction',
+    'Essential orientation for production floor personnel covering shop floor safety, PPE protocols, machine zone awareness, and quality reporting.',
+    'This mandatory worker induction module equips production team members with the operational and safety fundamentals necessary for working within our footwear manufacturing facilities.',
+    '["Comply with shop floor safety protocols, emergency stops, and designated transit zones", "Demonstrate proper use of required Personal Protective Equipment (PPE)", "Understand factory shift handovers and supervisor quality reporting lines"]'::jsonb,
+    '["Wear mandatory safety footwear and eye protection in active workshops", "Inspect all machine guards and emergency shutoff switches before shift start", "Immediately halt machinery and notify supervisor if defects or hazards occur"]'::jsonb,
+    NULL,
+    '/images/fusion-lasting.jpg',
+    2,
+    'draft'
+)
+ON CONFLICT (slug) DO UPDATE SET
+    category_id = EXCLUDED.category_id,
+    subject_id = EXCLUDED.subject_id,
+    title = EXCLUDED.title,
+    description = EXCLUDED.description,
+    overview = EXCLUDED.overview,
+    learning_objectives = EXCLUDED.learning_objectives,
+    instructions = EXCLUDED.instructions,
+    thumbnail_path = EXCLUDED.thumbnail_path,
+    display_order = EXCLUDED.display_order;
+
 -- 3.2 Workers Category -> Stitching Subject (6 Modules)
 INSERT INTO public.modules (
     category_id,

@@ -32,14 +32,9 @@ export function renderBreadcrumbs(crumbs) {
 }
 
 // -----------------------------------------------------------------------------
-// 1. LEARNING CENTRE OVERVIEW
+// 1. LEARNING CENTRE OVERVIEW (HOME)
 // -----------------------------------------------------------------------------
 export function renderLearningCenterPage(categories = null) {
-  const breadcrumbs = renderBreadcrumbs([
-    { label: 'Home', url: '/' },
-    { label: 'Learning Centre', url: '/learning' }
-  ]);
-
   // Fallback if categories not yet fetched
   const cats = categories || [
     {
@@ -47,9 +42,9 @@ export function renderLearningCenterPage(categories = null) {
       slug: 'staff',
       description: 'Get introduced to Fusionsole, understand the workplace environment and learn the essential information needed to begin your journey with the company.',
       image_path: '/images/fusion-moulds.jpg',
-      badge: 'STAFF INDUCTION',
-      meta: '1 Core Module',
-      tags: ['Company Overview', 'Workplace Safety', 'HR Standards']
+      badge: 'STAFF & WORKER INDUCTION',
+      meta: '2 Core Modules',
+      tags: ['Staff Induction', 'Worker Induction', 'Workplace Safety']
     },
     {
       name: 'Workers',
@@ -81,7 +76,7 @@ export function renderLearningCenterPage(categories = null) {
         <div class="category-card-body">
           <div class="category-meta-line">
             <span class="category-index-num">CATEGORY ${numStr}</span>
-            <span class="category-duration">${isStaff ? '1 Core Module' : '3 Manufacturing Departments'}</span>
+            <span class="category-duration">${isStaff ? '2 Core Modules' : '3 Manufacturing Departments'}</span>
           </div>
           <h2 class="category-card-title">${cat.name}</h2>
           <p class="category-card-text">
@@ -89,7 +84,7 @@ export function renderLearningCenterPage(categories = null) {
           </p>
           <div class="category-preview-tags">
             ${isStaff 
-              ? '<span class="preview-tag">Company Overview</span><span class="preview-tag">Workplace Safety</span><span class="preview-tag">HR Standards</span>'
+              ? '<span class="preview-tag">Staff Induction</span><span class="preview-tag">Worker Induction</span><span class="preview-tag">Workplace Safety</span>'
               : '<span class="preview-tag">Stitching</span><span class="preview-tag">Assembly</span><span class="preview-tag">Cutting</span>'}
           </div>
           <div class="category-card-action">
@@ -107,8 +102,6 @@ export function renderLearningCenterPage(categories = null) {
 
   return `
     <div class="learning-page-wrapper">
-      ${breadcrumbs}
-
       <!-- Page Intro Header -->
       <section class="learning-hero-header">
         <div class="container">
@@ -135,19 +128,93 @@ export function renderLearningCenterPage(categories = null) {
 }
 
 // -----------------------------------------------------------------------------
-// 2. STAFF LANDING PAGE
+// 2. STAFF & WORKER INDUCTION LANDING PAGE
 // -----------------------------------------------------------------------------
-export function renderStaffLandingPage(moduleRecord = null) {
+export function renderStaffLandingPage(modulesList = null) {
   const staff = subjectsData.staff;
   const breadcrumbs = renderBreadcrumbs([
     { label: 'Home', url: '/' },
-    { label: 'Learning Centre', url: '/learning' },
-    { label: 'Staff', url: '/learning/staff' }
+    { label: 'Staff & Worker Induction', url: '/learning/staff' }
   ]);
 
-  const modTitle = moduleRecord?.title || 'Staff Induction';
-  const modDesc = moduleRecord?.description || staff.description;
-  const modSlug = moduleRecord?.slug || 'staff-induction';
+  // Determine list of modules to display
+  let rawModules = [];
+  if (Array.isArray(modulesList) && modulesList.length > 0) {
+    rawModules = modulesList;
+  } else if (modulesList && typeof modulesList === 'object' && !Array.isArray(modulesList)) {
+    rawModules = [modulesList];
+  } else {
+    rawModules = staff.modules;
+  }
+
+  // Ensure both staff-induction and worker-induction are represented
+  const fullModules = [...rawModules];
+  staff.modules.forEach(defaultMod => {
+    if (!fullModules.some(m => m.slug === defaultMod.slug)) {
+      fullModules.push(defaultMod);
+    }
+  });
+
+  // Sort by display_order
+  fullModules.sort((a, b) => (a.display_order || 1) - (b.display_order || 1));
+
+  const cardsHtml = fullModules.map((mod, idx) => {
+    const numStr = String(mod.display_order || idx + 1).padStart(2, '0');
+    const isWorker = mod.slug === 'worker-induction';
+    const imagePath = mod.thumbnail_path || (isWorker ? '/images/fusion-lasting.jpg' : '/images/fusion-moulds.jpg');
+    const modTitle = mod.title || (isWorker ? 'Worker Induction' : 'Staff Induction');
+    const modDesc = mod.description || mod.shortDesc || (isWorker 
+      ? 'Essential orientation for production floor personnel covering shop floor safety, PPE protocols, machine zone awareness, and quality reporting.'
+      : 'Get introduced to our workplace culture, organizational values, facility layout, safety protocols, and company operational standards.'
+    );
+
+    const checklistItems = isWorker ? [
+      'Factory floor safety, emergency stops & PPE requirements',
+      'Shift attendance, machine operation zones & workstation care',
+      'Defect escalation, quality standards & supervisor reporting'
+    ] : [
+      'Company mission, history & manufacturing standards',
+      'Workplace health, safety protocols & factory walking lanes',
+      'HR guidelines, employee benefits & communication channels'
+    ];
+
+    const checklistHtml = checklistItems.map(item => `
+      <div class="check-item">
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#1e40af" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg>
+        <span>${item}</span>
+      </div>
+    `).join('');
+
+    return `
+      <div class="staff-module-spotlight" style="${idx > 0 ? 'margin-top: 32px;' : 'margin-top: 16px;'}">
+        <div class="spotlight-card">
+          <div class="spotlight-media">
+            <img src="${imagePath}" alt="${modTitle} training environment" loading="lazy" />
+            <div class="spotlight-video-badge">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <span>Video &amp; Assessment</span>
+            </div>
+          </div>
+          <div class="spotlight-content">
+            <div class="module-number-pill">MODULE ${numStr}</div>
+            <h3 class="spotlight-title">${modTitle}</h3>
+            <p class="spotlight-desc">
+              ${modDesc}
+            </p>
+            <div class="spotlight-checklist">
+              ${checklistHtml}
+            </div>
+            <div class="spotlight-action">
+              <a href="/learning/staff/${mod.slug}" class="btn btn-primary btn-lg">
+                <span>View Module &amp; Start Induction</span>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 
   return `
     <div class="learning-page-wrapper">
@@ -169,46 +236,11 @@ export function renderStaffLandingPage(moduleRecord = null) {
         <div class="container">
           <div class="modules-section-meta">
             <h2 class="modules-section-heading">Induction Curriculum</h2>
-            <span class="modules-count-badge">1 Core Induction Module</span>
+            <span class="modules-count-badge">${fullModules.length} Core Induction Modules</span>
           </div>
 
-          <div class="staff-module-spotlight">
-            <div class="spotlight-card">
-              <div class="spotlight-media">
-                <img src="/images/fusion-moulds.jpg" alt="Fusionsole factory floor and company induction" />
-                <div class="spotlight-video-badge">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  <span>Video &amp; Assessment</span>
-                </div>
-              </div>
-              <div class="spotlight-content">
-                <div class="module-number-pill">MODULE 01</div>
-                <h3 class="spotlight-title">${modTitle}</h3>
-                <p class="spotlight-desc">
-                  ${modDesc}
-                </p>
-                <div class="spotlight-checklist">
-                  <div class="check-item">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#1e40af" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg>
-                    <span>Company mission, history &amp; manufacturing standards</span>
-                  </div>
-                  <div class="check-item">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#1e40af" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg>
-                    <span>Workplace health, safety protocols &amp; factory walking lanes</span>
-                  </div>
-                  <div class="check-item">
-                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#1e40af" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg>
-                    <span>HR guidelines, employee benefits &amp; communication channels</span>
-                  </div>
-                </div>
-                <div class="spotlight-action">
-                  <a href="/learning/staff/${modSlug}" class="btn btn-primary btn-lg">
-                    <span>View Module &amp; Start Induction</span>
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
-                  </a>
-                </div>
-              </div>
-            </div>
+          <div class="staff-modules-stack">
+            ${cardsHtml}
           </div>
         </div>
       </section>
@@ -222,8 +254,7 @@ export function renderStaffLandingPage(moduleRecord = null) {
 export function renderWorkersLandingPage(subjectsList = null) {
   const breadcrumbs = renderBreadcrumbs([
     { label: 'Home', url: '/' },
-    { label: 'Learning Centre', url: '/learning' },
-    { label: 'Workers', url: '/learning/workers' }
+    { label: 'Department Training', url: '/learning/workers' }
   ]);
 
   const defaultSubs = [
@@ -327,8 +358,7 @@ export function renderSubjectDetailPage(subject, modulesList = null) {
 
   const breadcrumbs = renderBreadcrumbs([
     { label: 'Home', url: '/' },
-    { label: 'Learning Centre', url: '/learning' },
-    { label: 'Workers', url: '/learning/workers' },
+    { label: 'Department Training', url: '/learning/workers' },
     { label: subject.name, url: `/learning/workers/${subject.slug}` }
   ]);
 
@@ -422,13 +452,12 @@ export function renderCourseDetailPage(subjectOrCategory, moduleData, quizData =
 
   // Breadcrumbs
   const breadcrumbItems = [
-    { label: 'Home', url: '/' },
-    { label: 'Learning Centre', url: '/learning' }
+    { label: 'Home', url: '/' }
   ];
   if (isStaff) {
-    breadcrumbItems.push({ label: 'Staff', url: '/learning/staff' });
+    breadcrumbItems.push({ label: 'Staff Induction', url: '/learning/staff' });
   } else {
-    breadcrumbItems.push({ label: 'Workers', url: '/learning/workers' });
+    breadcrumbItems.push({ label: 'Department Training', url: '/learning/workers' });
     breadcrumbItems.push({ label: subjectName, url: subjectRoute });
   }
   breadcrumbItems.push({ label: moduleData.title, url: `${subjectRoute}/${moduleData.slug}` });

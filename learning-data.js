@@ -9,14 +9,15 @@ export const subjectsData = {
     id: 'staff',
     name: 'Staff',
     route: '/learning/staff',
-    badge: 'STAFF LEARNING PROGRAMME',
-    headline: 'Staff Induction',
-    description: 'An introduction to Fusionsole, the workplace environment, company practices and essential information for newly joined staff.',
+    badge: 'STAFF & WORKER INDUCTION',
+    headline: 'Staff & Worker Induction',
+    description: 'An introduction to Fusionsole, the workplace environment, company practices and essential safety information for newly joined staff and production workers.',
     image: '/images/fusion-moulds.jpg',
-    modulesCount: 1,
-    previewItems: ['Company Overview', 'Workplace Safety & Standards', 'HR Policies & Growth'],
+    modulesCount: 2,
+    previewItems: ['Staff Induction', 'Worker Induction', 'Workplace Safety & Standards'],
     modules: [
       {
+        id: 'mod-01-staff-induction',
         slug: 'staff-induction',
         number: 1,
         title: 'Staff Induction',
@@ -66,6 +67,60 @@ export const subjectsData = {
             ],
             correctIndex: 0,
             explanation: 'Department supervisors and the HR Learning team are always available to assist new personnel with questions and checklist verifications.'
+          }
+        ]
+      },
+      {
+        id: 'mod-01b-worker-induction',
+        slug: 'worker-induction',
+        number: 2,
+        title: 'Worker Induction',
+        shortDesc: 'Essential orientation for production floor personnel covering shop floor safety, PPE protocols, machine zone awareness, and quality reporting.',
+        videoTitle: 'Fusionsole Production Floor & Worker Safety Orientation',
+        overview: 'This mandatory worker induction module equips production team members with the operational and safety fundamentals necessary for working within our footwear manufacturing facilities. You will learn safety walkway rules, personal protective equipment (PPE) requirements, machine guard inspection, shift handover procedures, and the quality reporting chain.',
+        objectives: [
+          'Comply with shop floor safety protocols, emergency stops, and designated transit zones.',
+          'Demonstrate proper use of required Personal Protective Equipment (PPE) for footwear production.',
+          'Understand factory shift handovers, attendance logging, and supervisor quality reporting lines.'
+        ],
+        instructions: [
+          'Wear mandatory safety footwear, hair restraints, and eye protection at all times within active workshops.',
+          'Inspect all machine guards, emergency shutoff switches, and ventilation hoods before starting any shift.',
+          'Immediately halt machinery and notify the line supervisor if any equipment abnormality or safety defect is detected.'
+        ],
+        quiz: [
+          {
+            question: 'What is required before starting work on any production floor machinery?',
+            options: [
+              'Begin operation immediately without checking equipment',
+              'Inspect machine guards, verify emergency stop functions, and equip required PPE',
+              'Disable machine safety covers to speed up production',
+              'Borrow another worker\'s badge to sign in'
+            ],
+            correctIndex: 1,
+            explanation: 'Workers must always inspect guards, verify emergency stops, and equip all mandatory PPE prior to operating any machinery.'
+          },
+          {
+            question: 'If a worker spots an oil leak, damaged electrical wire, or malfunctioning needle on the line, what should they do?',
+            options: [
+              'Ignore it and continue working',
+              'Attempt unauthorized electrical repairs alone',
+              'Safely halt the equipment and immediately report the hazard to the line supervisor',
+              'Leave the workstation without notifying anyone'
+            ],
+            correctIndex: 2,
+            explanation: 'Safety and quality require immediate reporting of hazards or defects to the department supervisor.'
+          },
+          {
+            question: 'Where must factory personnel and workers walk when navigating between workshops?',
+            options: [
+              'Directly across active conveyor lines',
+              'Within designated, clearly marked safety walkways and pedestrian lanes',
+              'Behind forklift loading docks',
+              'Under suspended material hoists'
+            ],
+            correctIndex: 1,
+            explanation: 'All team members must use marked pedestrian walkways to prevent accidents with carts, forklifts, and moving equipment.'
           }
         ]
       }

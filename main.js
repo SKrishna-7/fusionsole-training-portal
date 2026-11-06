@@ -5,6 +5,7 @@
  */
 
 import { dbService } from './supabase.js';
+import { subjectsData } from './learning-data.js';
 import {
   renderLearningCenterPage,
   renderStaffLandingPage,
@@ -31,7 +32,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // -----------------------------------------------------------
   // 1. Core DOM Views & Navigation
   // -----------------------------------------------------------
-  const homeView = document.getElementById('home-view');
   const learningView = document.getElementById('learning-view');
   const adminView = document.getElementById('admin-view');
   const siteHeader = document.getElementById('header');
@@ -46,74 +46,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     subjectId: '',
     status: ''
   };
-
-  // -----------------------------------------------------------
-  // 2. Program Accordion for Homepage Section 5
-  // -----------------------------------------------------------
-  const programData = {
-    induction: {
-      title: 'Staff Induction',
-      desc: 'An introduction to Fusionsole, the workplace environment, company practices and essential information for newly joined staff.',
-      image: '/images/fusion-moulds.jpg',
-      alt: 'Fusionsole workplace environment and footwear lasting moulds',
-      url: '/learning/staff'
-    },
-    cutting: {
-      title: 'Cutting Department',
-      desc: 'An introduction to material preparation, cutting operations and the processes involved in preparing footwear components.',
-      image: '/images/fusion-moulds.jpg',
-      alt: 'Footwear component patterns and preparation',
-      url: '/learning/workers/cutting'
-    },
-    stitching: {
-      title: 'Stitching Department',
-      desc: 'Understand stitching operations, equipment, component joining and the importance of quality throughout the process.',
-      image: '/images/fusion-stitching.jpg',
-      alt: 'Footwear upper stitching operation on industrial machinery',
-      url: '/learning/workers/stitching'
-    },
-    lasting: {
-      title: 'Lasting Department',
-      desc: 'Learn about shoe shaping, lasting operations and the processes involved in forming the footwear structure.',
-      image: '/images/fusion-lasting.jpg',
-      alt: 'Shoe lasting and sole bonding craftsmanship',
-      url: '/learning/workers/assembly'
-    },
-    finishing: {
-      title: 'Finishing & Packing',
-      desc: 'Understand the finishing process, quality inspection, product presentation and packaging procedures.',
-      image: '/images/fusion-lasting.jpg',
-      alt: 'Footwear finishing and quality inspection',
-      url: '/learning/workers/assembly'
-    }
-  };
-
-  const accordionItems = document.querySelectorAll('.accordion-item');
-  const programTitle = document.getElementById('programTitle');
-  const programDesc = document.getElementById('programDesc');
-  const programImage = document.getElementById('programImage');
-  const programDetailBtn = document.getElementById('programDetailBtn');
-
-  accordionItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const programKey = item.getAttribute('data-program');
-      if (!programKey || !programData[programKey]) return;
-
-      accordionItems.forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-
-      const data = programData[programKey];
-      if (programTitle) programTitle.textContent = data.title;
-      if (programDesc) programDesc.textContent = data.desc;
-      if (programImage) {
-        programImage.src = data.image;
-        programImage.alt = data.alt;
-      }
-      if (programDetailBtn) {
-        programDetailBtn.setAttribute('href', data.url);
-      }
-    });
-  });
 
   // Mobile Navigation Menu Toggle
   if (mobileBtn && mainNav) {
@@ -138,7 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         rawPath = rawPath.slice(0, -1);
       }
 
-      const parts = rawPath.split('/').filter(Boolean);
+      const parts = rawPath.split('/').filter(Boolean).map(p => {
+        try {
+          return decodeURIComponent(p).trim().replace(/\s+/g, '-');
+        } catch (e) {
+          return p.trim().replace(/\s+/g, '-');
+        }
+      });
 
       // =========================================================
       // ROUTE GROUP A: ADMIN PANEL (/admin/*)
@@ -147,7 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Hide public site headers/footers for focused enterprise experience
         if (siteHeader) siteHeader.style.display = 'none';
         if (siteFooter) siteFooter.style.display = 'none';
-        if (homeView) homeView.style.display = 'none';
         if (learningView) learningView.style.display = 'none';
         if (adminView) {
           adminView.style.display = 'block';
@@ -363,13 +300,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // =========================================================
-    // PUBLIC CONSUMER PORTAL & LEARNING CENTRE
+    // PUBLIC LEARNING PORTAL & LEARNING CENTRE (HOME)
     // =========================================================
     if (siteHeader) siteHeader.style.display = 'block';
     if (siteFooter) siteFooter.style.display = 'block';
     if (adminView) {
       adminView.style.display = 'none';
       adminView.innerHTML = '';
+    }
+    if (learningView) {
+      learningView.style.display = 'block';
     }
 
     // Update header login button based on auth state
@@ -385,15 +325,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
 
-    // Route: Homepage ("/" or empty) - Fully public
-    if (parts.length === 0 || parts[0] !== 'learning') {
-      if (homeView) homeView.style.display = 'block';
-      if (learningView) {
-        learningView.style.display = 'none';
-        learningView.innerHTML = '';
-      }
+    // Route: Home / Learning Centre ("/" or "/learning")
+    if (parts.length === 0 || (parts.length === 1 && parts[0] === 'learning')) {
+      const activeCats = await dbService.getCategories(true);
+      learningView.innerHTML = renderLearningCenterPage(activeCats);
       document.title = 'Fusionsole · Footwear Manufacturing Learning Platform';
-      
+
       if (window.location.hash) {
         const target = document.querySelector(window.location.hash);
         if (target) {
@@ -403,60 +340,74 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // All routes under /learning - Require authenticated, active HR account
-    if (!authUser || !authUser.is_active) {
-      const redirectUrl = encodeURIComponent(window.location.pathname + window.location.search);
-      window.history.pushState({}, '', `/admin/login?redirect=${redirectUrl}`);
-      handleRoute();
+    // Sub-route handling (supports both /learning/xyz and /xyz)
+    const subParts = parts[0] === 'learning' ? parts.slice(1) : parts;
+
+    // Route: Staff & Worker Induction (/learning/staff or /staff)
+    if (subParts.length === 1 && subParts[0] === 'staff') {
+      const staffCategory = await dbService.getCategoryBySlug('staff');
+      const staffModules = staffCategory
+        ? await dbService.getModules({ categoryId: staffCategory.id })
+        : await dbService.getModules({ categoryId: 'cat-staff-01' });
+
+      const modulesToRender = staffModules && staffModules.length > 0 
+        ? staffModules 
+        : subjectsData.staff.modules;
+
+      learningView.innerHTML = renderStaffLandingPage(modulesToRender);
+      document.title = 'Staff & Worker Induction · Fusionsole';
       return;
     }
 
-    if (homeView) homeView.style.display = 'none';
-    if (learningView) learningView.style.display = 'block';
-
-    // Route: /learning
-    if (parts.length === 1 && parts[0] === 'learning') {
-      const activeCats = await dbService.getCategories(true);
-      learningView.innerHTML = renderLearningCenterPage(activeCats);
-      document.title = 'Learning Centre · Fusionsole';
-      return;
-    }
-
-    // Route: /learning/staff
-    if (parts.length === 2 && parts[0] === 'learning' && parts[1] === 'staff') {
-      const staffModule = await dbService.getModuleBySlug('staff-induction');
-      learningView.innerHTML = renderStaffLandingPage(staffModule);
-      document.title = 'Staff Induction · Fusionsole Learning Centre';
-      return;
-    }
-
-    // Route: /learning/staff/:slug
-    if (parts.length === 3 && parts[0] === 'learning' && parts[1] === 'staff') {
-      const slug = parts[2];
-      const moduleData = await dbService.getModuleBySlug(slug);
+    // Route: Staff Module Detail (/learning/staff/:slug or /staff/:slug)
+    if (subParts.length === 2 && subParts[0] === 'staff') {
+      const slug = subParts[1];
+      let moduleData = await dbService.getModuleBySlug(slug);
+      if (!moduleData) {
+        moduleData = subjectsData.staff.modules.find(m => m.slug === slug);
+      }
       if (!moduleData) {
         renderNotFound(`Induction module "${slug}" was not found.`);
         return;
       }
-      const staffCat = { id: 'staff', name: 'Staff', slug: 'staff', image_path: '/images/fusion-moulds.jpg' };
-      const quizData = await dbService.getQuizByModuleId(moduleData.id, false);
+      const isWorker = slug === 'worker-induction';
+      const staffCat = { 
+        id: 'staff', 
+        name: isWorker ? 'Worker Induction' : 'Staff Induction', 
+        slug: 'staff', 
+        image_path: isWorker ? '/images/fusion-lasting.jpg' : '/images/fusion-moulds.jpg' 
+      };
+      const targetModId = moduleData.id || (isWorker ? 'mod-01b-worker-induction' : 'mod-01-staff-induction');
+      let quizData = null;
+      try {
+        quizData = await dbService.getQuizByModuleId(targetModId, false);
+      } catch (qErr) {
+        console.warn('Failed to load quiz by targetModId:', targetModId, qErr);
+      }
+      if (!quizData) {
+        try {
+          quizData = await dbService.getQuizByModuleId(slug, false);
+        } catch (slugErr) {
+          console.warn('Failed to load quiz by slug:', slug, slugErr);
+        }
+      }
       learningView.innerHTML = renderCourseDetailPage(staffCat, moduleData, quizData);
-      document.title = `${moduleData.title} · Staff Induction · Fusionsole`;
+      document.title = `${moduleData.title} · Fusionsole`;
       bindCoursePageInteractions(quizData);
       return;
     }
 
-    // Route: /learning/workers
-    if (parts.length === 2 && parts[0] === 'learning' && parts[1] === 'workers') {
+    // Route: Department Training / Workers Landing (/learning/workers or /workers)
+    if (subParts.length === 1 && subParts[0] === 'workers') {
       const activeSubs = await dbService.getSubjects(true);
       learningView.innerHTML = renderWorkersLandingPage(activeSubs);
-      document.title = 'Workers Training Programme · Fusionsole';
+      document.title = 'Department Training · Fusionsole';
       return;
     }
 
-    // Route: /learning/workers/:subject
-    if (parts.length === 3 && parts[0] === 'learning' && parts[1] === 'workers') {
-      const subjectSlug = parts[2];
+    // Route: Department Module Listing (/learning/workers/:subject or /workers/:subject)
+    if (subParts.length === 2 && subParts[0] === 'workers') {
+      const subjectSlug = subParts[1];
       const subject = await dbService.getSubjectBySlug(subjectSlug);
       if (subject) {
         const modules = await dbService.getModules({ subjectId: subject.id, status: 'published' });
@@ -468,15 +419,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    // Route: /learning/workers/:subject/:slug
-    if (parts.length === 4 && parts[0] === 'learning' && parts[1] === 'workers') {
-      const subjectSlug = parts[2];
-      const moduleSlug = parts[3];
+    // Route: Worker Course Detail (/learning/workers/:subject/:slug or /workers/:subject/:slug)
+    if (subParts.length === 3 && subParts[0] === 'workers') {
+      const subjectSlug = subParts[1];
+      const moduleSlug = subParts[2];
       const subject = await dbService.getSubjectBySlug(subjectSlug);
       const moduleData = await dbService.getModuleBySlug(moduleSlug);
 
       if (subject && moduleData) {
-        const quizData = await dbService.getQuizByModuleId(moduleData.id, false);
+        let quizData = null;
+        try {
+          quizData = await dbService.getQuizByModuleId(moduleData.id, false);
+        } catch (qErr) {
+          console.warn('Failed to load quiz by moduleData.id:', moduleData.id, qErr);
+        }
+        if (!quizData) {
+          try {
+            quizData = await dbService.getQuizByModuleId(moduleSlug, false);
+          } catch (e) {}
+        }
         learningView.innerHTML = renderCourseDetailPage(subject, moduleData, quizData);
         document.title = `${moduleData.title} · ${subject.name} · Fusionsole`;
         bindCoursePageInteractions(quizData);
@@ -501,7 +462,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (siteHeader) siteHeader.style.display = 'block';
     if (siteFooter) siteFooter.style.display = 'block';
-    if (homeView) homeView.style.display = 'none';
     if (adminView && container !== adminView) adminView.style.display = 'none';
     if (learningView && container !== learningView) learningView.style.display = 'none';
     container.style.display = 'block';
@@ -522,7 +482,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </p>
           <div class="db-error-actions">
             <button onclick="window.location.reload()" class="btn btn-primary">Retry Connection</button>
-            <a href="/" class="btn btn-secondary">Return to Homepage</a>
+            <a href="/" class="btn btn-secondary">Return to Learning Centre</a>
           </div>
         </div>
       </div>
@@ -714,16 +674,119 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
 
-    // Populate user profile info in navbar
+    // Populate user profile info in navbar & handle avatar
     dbService.getCurrentUser().then(user => {
       const nameEl = document.getElementById('adminNavUserName');
       const roleEl = document.getElementById('adminNavUserRole');
-      if (nameEl && user) nameEl.textContent = user.full_name;
-      if (roleEl && user) roleEl.textContent = user.role === 'admin' ? 'Administrator' : 'HR Staff';
+      const avatarEl = document.getElementById('adminNavAvatar');
+      const currentName = user?.full_name || 'Admin';
+      if (nameEl) nameEl.textContent = currentName;
+      if (roleEl) roleEl.textContent = user?.role === 'admin' ? 'Administrator' : 'HR Staff';
+      if (avatarEl) {
+        const initials = currentName.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AD';
+        avatarEl.textContent = initials;
+      }
+    });
+
+    // Administrator profile quick-edit modal
+    const profileModal = document.getElementById('adminProfileModal');
+    const editQuickBtn = document.getElementById('editAdminProfileQuickBtn');
+    const adminNameSpan = document.getElementById('adminNavUserName');
+    const closeProfileBtn = document.getElementById('closeAdminProfileModalBtn');
+    const cancelProfileBtn = document.getElementById('cancelAdminProfileModalBtn');
+    const profileForm = document.getElementById('adminProfileModalForm');
+    const profileInput = document.getElementById('adminProfileDisplayName');
+
+    const openProfileModal = async () => {
+      if (!profileModal) return;
+      const user = await dbService.getCurrentUser();
+      if (profileInput) {
+        profileInput.value = user?.full_name || 'Admin';
+      }
+      profileModal.style.display = 'flex';
+      setTimeout(() => profileInput?.focus(), 50);
+    };
+
+    const closeProfileModal = () => {
+      if (profileModal) profileModal.style.display = 'none';
+    };
+
+    editQuickBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openProfileModal();
+    });
+    adminNameSpan?.addEventListener('click', openProfileModal);
+    closeProfileBtn?.addEventListener('click', closeProfileModal);
+    cancelProfileBtn?.addEventListener('click', closeProfileModal);
+    profileModal?.addEventListener('click', (e) => {
+      if (e.target === profileModal) closeProfileModal();
+    });
+
+    profileForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newName = profileInput?.value?.trim() || 'Admin';
+      const saveBtn = document.getElementById('saveAdminProfileModalBtn');
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+      }
+      try {
+        const updated = await dbService.updateAdminProfile(newName);
+        const nameEl = document.getElementById('adminNavUserName');
+        const avatarEl = document.getElementById('adminNavAvatar');
+        if (nameEl) nameEl.textContent = updated.full_name;
+        if (avatarEl) {
+          const initials = updated.full_name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AD';
+          avatarEl.textContent = initials;
+        }
+        const settingsInput = document.getElementById('adminSettingsDisplayName');
+        if (settingsInput) settingsInput.value = updated.full_name;
+        closeProfileModal();
+      } catch (err) {
+        alert('Failed to update administrator profile: ' + (err.message || 'Unknown error'));
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Name';
+        }
+      }
     });
   }
 
   function bindAdminLoginInteractions() {
+    const tabSignIn = document.getElementById('authTabSignIn');
+    const tabRegister = document.getElementById('authTabRegister');
+    const sectionSignIn = document.getElementById('authSectionSignIn');
+    const sectionRegister = document.getElementById('authSectionRegister');
+    const switchToRegisterLink = document.getElementById('switchToRegisterLink');
+    const switchToSignInLink = document.getElementById('switchToSignInLink');
+
+    const showSignIn = () => {
+      if (tabSignIn) tabSignIn.classList.add('active');
+      if (tabRegister) tabRegister.classList.remove('active');
+      if (sectionSignIn) sectionSignIn.style.display = 'block';
+      if (sectionRegister) sectionRegister.style.display = 'none';
+    };
+
+    const showRegister = () => {
+      if (tabRegister) tabRegister.classList.add('active');
+      if (tabSignIn) tabSignIn.classList.remove('active');
+      if (sectionRegister) sectionRegister.style.display = 'block';
+      if (sectionSignIn) sectionSignIn.style.display = 'none';
+    };
+
+    tabSignIn?.addEventListener('click', showSignIn);
+    tabRegister?.addEventListener('click', showRegister);
+    switchToRegisterLink?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showRegister();
+    });
+    switchToSignInLink?.addEventListener('click', (e) => {
+      e.preventDefault();
+      showSignIn();
+    });
+
+    // 1. Sign In submission
     const form = document.getElementById('adminLoginForm');
     const alertBox = document.getElementById('loginAlertBox');
     const submitBtn = document.getElementById('loginSubmitBtn');
@@ -756,6 +819,77 @@ document.addEventListener('DOMContentLoaded', async () => {
           const redirectParam = urlParams.get('redirect');
           const isLearning = redirectParam && decodeURIComponent(redirectParam).startsWith('/learning');
           submitBtn.textContent = isLearning ? 'Sign In & Continue to Module' : 'Sign In to Admin Panel';
+        }
+      });
+    }
+
+    // 2. Register New Admin submission
+    const registerForm = document.getElementById('adminRegisterForm');
+    const registerAlertBox = document.getElementById('registerAlertBox');
+    const registerSuccessBox = document.getElementById('registerSuccessBox');
+    const registerSubmitBtn = document.getElementById('registerSubmitBtn');
+
+    if (registerForm) {
+      registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('registerFullName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('registerConfirmPassword').value;
+
+        if (registerAlertBox) registerAlertBox.style.display = 'none';
+        if (registerSuccessBox) registerSuccessBox.style.display = 'none';
+
+        if (password !== confirmPassword) {
+          if (registerAlertBox) {
+            registerAlertBox.style.display = 'block';
+            registerAlertBox.textContent = 'Passwords do not match. Please verify both password fields.';
+          }
+          return;
+        }
+
+        if (password.length < 6) {
+          if (registerAlertBox) {
+            registerAlertBox.style.display = 'block';
+            registerAlertBox.textContent = 'Password must be at least 6 characters long.';
+          }
+          return;
+        }
+
+        registerSubmitBtn.disabled = true;
+        registerSubmitBtn.textContent = 'Creating Admin Account...';
+
+        try {
+          const res = await dbService.signUpAdmin({
+            full_name: fullName,
+            email,
+            password
+          });
+
+          if (res && res.requiresEmailConfirmation) {
+            if (registerSuccessBox) {
+              registerSuccessBox.style.display = 'block';
+              registerSuccessBox.textContent = res.message || 'Admin account created! Please check your email to verify.';
+            }
+            registerSubmitBtn.disabled = false;
+            registerSubmitBtn.textContent = 'Account Created';
+            return;
+          }
+
+          // Successfully created & authenticated -> redirect
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectParam = urlParams.get('redirect');
+          const target = redirectParam ? decodeURIComponent(redirectParam) : '/admin';
+          window.history.pushState({}, '', target);
+          handleRoute();
+        } catch (err) {
+          if (registerAlertBox) {
+            registerAlertBox.style.display = 'block';
+            registerAlertBox.textContent = err.message || 'Failed to create admin account.';
+          }
+        } finally {
+          registerSubmitBtn.disabled = false;
+          registerSubmitBtn.textContent = 'Create Admin & Sign In';
         }
       });
     }
@@ -1512,6 +1646,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     const clearBtn = document.getElementById('clearSupabaseCredsBtn');
     const exportBtn = document.getElementById('exportLocalDbBtn');
     const resetBtn = document.getElementById('resetLocalDbBtn');
+    const profileForm = document.getElementById('adminSettingsProfileForm');
+    const displayNameInput = document.getElementById('adminSettingsDisplayName');
+
+    if (displayNameInput) {
+      dbService.getCurrentUser().then(user => {
+        if (user && user.full_name) {
+          displayNameInput.value = user.full_name;
+        }
+      });
+    }
+
+    profileForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newName = displayNameInput?.value?.trim() || 'Admin';
+      const submitBtn = document.getElementById('saveAdminSettingsProfileBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+      }
+      try {
+        const updated = await dbService.updateAdminProfile(newName);
+        const nameEl = document.getElementById('adminNavUserName');
+        const avatarEl = document.getElementById('adminNavAvatar');
+        if (nameEl) nameEl.textContent = updated.full_name;
+        if (avatarEl) {
+          const initials = updated.full_name.split(' ').map(n => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase() || 'AD';
+          avatarEl.textContent = initials;
+        }
+        alert(`Administrator display name successfully updated to "${updated.full_name}".`);
+      } catch (err) {
+        alert('Failed to update administrator name: ' + (err.message || 'Unknown error'));
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Update Administrator Name';
+        }
+      }
+    });
 
     connForm?.addEventListener('submit', (e) => {
       e.preventDefault();
