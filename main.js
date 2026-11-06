@@ -754,39 +754,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function bindAdminLoginInteractions() {
-    const tabSignIn = document.getElementById('authTabSignIn');
-    const tabRegister = document.getElementById('authTabRegister');
-    const sectionSignIn = document.getElementById('authSectionSignIn');
-    const sectionRegister = document.getElementById('authSectionRegister');
-    const switchToRegisterLink = document.getElementById('switchToRegisterLink');
-    const switchToSignInLink = document.getElementById('switchToSignInLink');
-
-    const showSignIn = () => {
-      if (tabSignIn) tabSignIn.classList.add('active');
-      if (tabRegister) tabRegister.classList.remove('active');
-      if (sectionSignIn) sectionSignIn.style.display = 'block';
-      if (sectionRegister) sectionRegister.style.display = 'none';
-    };
-
-    const showRegister = () => {
-      if (tabRegister) tabRegister.classList.add('active');
-      if (tabSignIn) tabSignIn.classList.remove('active');
-      if (sectionRegister) sectionRegister.style.display = 'block';
-      if (sectionSignIn) sectionSignIn.style.display = 'none';
-    };
-
-    tabSignIn?.addEventListener('click', showSignIn);
-    tabRegister?.addEventListener('click', showRegister);
-    switchToRegisterLink?.addEventListener('click', (e) => {
-      e.preventDefault();
-      showRegister();
-    });
-    switchToSignInLink?.addEventListener('click', (e) => {
-      e.preventDefault();
-      showSignIn();
-    });
-
-    // 1. Sign In submission
+    // Sign In submission
     const form = document.getElementById('adminLoginForm');
     const alertBox = document.getElementById('loginAlertBox');
     const submitBtn = document.getElementById('loginSubmitBtn');
@@ -819,77 +787,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           const redirectParam = urlParams.get('redirect');
           const isLearning = redirectParam && decodeURIComponent(redirectParam).startsWith('/learning');
           submitBtn.textContent = isLearning ? 'Sign In & Continue to Module' : 'Sign In to Admin Panel';
-        }
-      });
-    }
-
-    // 2. Register New Admin submission
-    const registerForm = document.getElementById('adminRegisterForm');
-    const registerAlertBox = document.getElementById('registerAlertBox');
-    const registerSuccessBox = document.getElementById('registerSuccessBox');
-    const registerSubmitBtn = document.getElementById('registerSubmitBtn');
-
-    if (registerForm) {
-      registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fullName = document.getElementById('registerFullName').value.trim();
-        const email = document.getElementById('registerEmail').value.trim();
-        const password = document.getElementById('registerPassword').value;
-        const confirmPassword = document.getElementById('registerConfirmPassword').value;
-
-        if (registerAlertBox) registerAlertBox.style.display = 'none';
-        if (registerSuccessBox) registerSuccessBox.style.display = 'none';
-
-        if (password !== confirmPassword) {
-          if (registerAlertBox) {
-            registerAlertBox.style.display = 'block';
-            registerAlertBox.textContent = 'Passwords do not match. Please verify both password fields.';
-          }
-          return;
-        }
-
-        if (password.length < 6) {
-          if (registerAlertBox) {
-            registerAlertBox.style.display = 'block';
-            registerAlertBox.textContent = 'Password must be at least 6 characters long.';
-          }
-          return;
-        }
-
-        registerSubmitBtn.disabled = true;
-        registerSubmitBtn.textContent = 'Creating Admin Account...';
-
-        try {
-          const res = await dbService.signUpAdmin({
-            full_name: fullName,
-            email,
-            password
-          });
-
-          if (res && res.requiresEmailConfirmation) {
-            if (registerSuccessBox) {
-              registerSuccessBox.style.display = 'block';
-              registerSuccessBox.textContent = res.message || 'Admin account created! Please check your email to verify.';
-            }
-            registerSubmitBtn.disabled = false;
-            registerSubmitBtn.textContent = 'Account Created';
-            return;
-          }
-
-          // Successfully created & authenticated -> redirect
-          const urlParams = new URLSearchParams(window.location.search);
-          const redirectParam = urlParams.get('redirect');
-          const target = redirectParam ? decodeURIComponent(redirectParam) : '/admin';
-          window.history.pushState({}, '', target);
-          handleRoute();
-        } catch (err) {
-          if (registerAlertBox) {
-            registerAlertBox.style.display = 'block';
-            registerAlertBox.textContent = err.message || 'Failed to create admin account.';
-          }
-        } finally {
-          registerSubmitBtn.disabled = false;
-          registerSubmitBtn.textContent = 'Create Admin & Sign In';
         }
       });
     }
@@ -1546,7 +1443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const pwdGroup = document.getElementById('userPasswordGroup');
       const pwdInput = document.getElementById('userPassword');
       if (user) {
-        modalTitle.textContent = 'Edit HR Member: ' + user.full_name;
+        modalTitle.textContent = 'Edit Account: ' + user.full_name;
         document.getElementById('userId').value = user.id;
         document.getElementById('userFullName').value = user.full_name;
         document.getElementById('userEmail').value = user.email;
@@ -1555,13 +1452,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (pwdGroup) pwdGroup.style.display = 'none';
         if (pwdInput) pwdInput.required = false;
       } else {
-        modalTitle.textContent = 'Invite HR Member';
+        modalTitle.textContent = 'Add Administrator or Team Member';
         document.getElementById('userId').value = '';
+        document.getElementById('userRole').value = 'admin';
         document.getElementById('userIsActive').checked = true;
         if (pwdGroup) pwdGroup.style.display = 'block';
         if (pwdInput) {
           pwdInput.required = true;
-          pwdInput.value = 'Fusionsole@123';
+          pwdInput.value = '';
+          pwdInput.placeholder = 'Enter login password (min 6 chars)';
         }
       }
       modal.style.display = 'flex';

@@ -10,10 +10,6 @@ import { dbService, isProduction } from './supabase.js';
 // 1. ADMIN SHELL & NAVIGATION WRAPPER
 // -----------------------------------------------------------------------------
 export function renderAdminShell(activeSection, contentHtml, breadcrumbs = []) {
-  const conn = dbService.getConnectionStatus();
-  const connClass = conn.isLive ? 'status-live' : 'status-local';
-  const connText = conn.isLive ? 'Supabase Connected' : 'Local DB Mode';
-
   const breadcrumbItems = [
     { label: 'Admin', url: '/admin' },
     ...breadcrumbs
@@ -90,7 +86,7 @@ export function renderAdminShell(activeSection, contentHtml, breadcrumbs = []) {
             <li>
               <a href="/admin/team" class="admin-nav-link ${activeSection === 'team' ? 'active' : ''}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span>HR Team</span>
+                <span>Team &amp; Admins</span>
               </a>
             </li>
             <li>
@@ -122,11 +118,6 @@ export function renderAdminShell(activeSection, contentHtml, breadcrumbs = []) {
           </div>
 
           <div class="admin-topbar-right">
-            <a href="/admin/settings" class="admin-conn-pill ${connClass}" title="${conn.mode}">
-              <span class="conn-dot"></span>
-              <span class="conn-label">${connText}</span>
-            </a>
-
             <div class="admin-topbar-actions">
               <button type="button" id="adminLogoutBtn" class="btn btn-ghost-sm" title="Log out from Admin session">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -1155,13 +1146,13 @@ export function renderTeamManagement(members) {
       <div class="admin-page-header">
         <div>
           <span class="admin-page-eyebrow">ACCESS CONTROL</span>
-          <h1 class="admin-page-title">HR Team Management (${members.length})</h1>
-          <p class="admin-page-desc">Manage administrative access and permissions for HR personnel (Free Tier ~10 accounts).</p>
+          <h1 class="admin-page-title">Administrator &amp; Team Management (${members.length})</h1>
+          <p class="admin-page-desc">Manage system administrators and HR staff. Authenticated administrators can add new admins, assign roles, and control system access.</p>
         </div>
         <div class="admin-header-actions">
           <button type="button" id="openCreateUserModalBtn" class="btn btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-            <span>Invite HR Member</span>
+            <span>+ Add Admin / Team Member</span>
           </button>
         </div>
       </div>
@@ -1190,7 +1181,7 @@ export function renderTeamManagement(members) {
     <div class="admin-modal-overlay" id="userModal" style="display: none;">
       <div class="admin-modal-card">
         <div class="admin-modal-header">
-          <h3 class="admin-modal-title" id="userModalTitle">Invite HR Member</h3>
+          <h3 class="admin-modal-title" id="userModalTitle">Add Administrator or Team Member</h3>
           <button type="button" class="modal-close-btn" id="closeUserModalBtn">&times;</button>
         </div>
         <form id="userForm" class="admin-modal-form">
@@ -1198,26 +1189,26 @@ export function renderTeamManagement(members) {
 
           <div class="form-group">
             <label for="userFullName" class="form-label">Full Name *</label>
-            <input type="text" id="userFullName" name="full_name" class="form-input" required placeholder="e.g. Sarah Jenkins" />
+            <input type="text" id="userFullName" name="full_name" class="form-input" required placeholder="e.g. Alex Henderson" />
           </div>
 
           <div class="form-group">
             <label for="userEmail" class="form-label">Corporate Email Address *</label>
-            <input type="email" id="userEmail" name="email" class="form-input" required placeholder="sarah.jenkins@fusionsole.com" />
+            <input type="email" id="userEmail" name="email" class="form-input" required placeholder="alex.henderson@fusionsole.com" />
           </div>
 
           <div class="form-group">
             <label for="userRole" class="form-label">Permission Role *</label>
             <select id="userRole" name="role" class="form-select" required>
+              <option value="admin" selected>Administrator (Full CMS, module CRUD, quiz builder, team management)</option>
               <option value="hr_staff">HR Staff (Browse training, conduct quizzes, read-only)</option>
-              <option value="admin">Administrator (Full CMS, module CRUD, quiz builder, team management)</option>
             </select>
           </div>
 
           <div class="form-group" id="userPasswordGroup">
             <label for="userPassword" class="form-label">Initial Password *</label>
-            <input type="password" id="userPassword" name="password" class="form-input" value="Fusionsole@123" placeholder="••••••••" />
-            <small class="text-xs text-muted" style="display: block; margin-top: 4px;">Initial login password for their portal sign-in (min 6 characters).</small>
+            <input type="password" id="userPassword" name="password" class="form-input" placeholder="Enter password (min 6 chars)" minlength="6" />
+            <small class="text-xs text-muted" style="display: block; margin-top: 4px;">Initial password for portal sign-in (minimum 6 characters).</small>
           </div>
 
           <div class="form-group">
@@ -1229,7 +1220,7 @@ export function renderTeamManagement(members) {
 
           <div class="admin-modal-footer">
             <button type="button" class="btn btn-outline" id="cancelUserModalBtn">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="saveUserBtn">Save Account</button>
+            <button type="submit" class="btn btn-primary" id="saveUserBtn">Create / Save Account</button>
           </div>
         </form>
       </div>
@@ -1265,8 +1256,12 @@ export function renderSettingsView() {
             <input type="text" id="adminSettingsDisplayName" class="form-input" placeholder="Admin" value="Admin" required />
             <span class="form-help">Default name is <strong>Admin</strong>.</span>
           </div>
-          <div class="btn-row" style="margin-top: 16px;">
+          <div class="btn-row" style="margin-top: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <button type="submit" class="btn btn-primary" id="saveAdminSettingsProfileBtn">Update Administrator Name</button>
+            <a href="/admin/team" class="btn btn-outline" style="display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              <span>+ Add / Manage Administrators</span>
+            </a>
           </div>
         </form>
       </div>
@@ -1369,87 +1364,28 @@ export function renderAdminLogin() {
           <span class="admin-login-portal-title">LEARNING &amp; DEVELOPMENT ADMIN</span>
         </div>
 
-        <!-- Auth Tabs: Sign In vs Create Admin -->
-        <div class="admin-auth-tabs">
-          <button type="button" class="admin-auth-tab active" id="authTabSignIn">Sign In</button>
-          <button type="button" class="admin-auth-tab" id="authTabRegister">+ Create New Admin</button>
+        <div class="admin-login-header">
+          <h1 class="admin-login-title">${title}</h1>
+          <p class="admin-login-subtitle">${subtitle}</p>
         </div>
 
-        <!-- SECTION 1: SIGN IN -->
-        <div id="authSectionSignIn">
-          <div class="admin-login-header">
-            <h1 class="admin-login-title">${title}</h1>
-            <p class="admin-login-subtitle">${subtitle}</p>
+        <form id="adminLoginForm" class="admin-login-form">
+          <div id="loginAlertBox" class="alert-box alert-danger" style="display: none;"></div>
+
+          <div class="form-group">
+            <label for="loginEmail" class="form-label">Corporate Email</label>
+            <input type="email" id="loginEmail" name="email" class="form-input" required value="${defaultEmail}" placeholder="admin@fusionsole.com" autocomplete="username" />
           </div>
 
-          <form id="adminLoginForm" class="admin-login-form">
-            <div id="loginAlertBox" class="alert-box alert-danger" style="display: none;"></div>
-
-            <div class="form-group">
-              <label for="loginEmail" class="form-label">Corporate Email</label>
-              <input type="email" id="loginEmail" name="email" class="form-input" required value="${defaultEmail}" placeholder="admin@fusionsole.com" autocomplete="username" />
-            </div>
-
-            <div class="form-group">
-              <label for="loginPassword" class="form-label">Password</label>
-              <input type="password" id="loginPassword" name="password" class="form-input" required value="${defaultPassword}" placeholder="••••••••" autocomplete="current-password" />
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginSubmitBtn">
-              ${btnText}
-            </button>
-          </form>
-
-          <div style="margin-top: 16px; font-size: 0.8125rem; color: #64748b; text-align: center;">
-            Need a new admin account? <a href="#" id="switchToRegisterLink" class="text-primary hover-underline font-semibold">Create an admin login</a>
-          </div>
-        </div>
-
-        <!-- SECTION 2: CREATE ADMIN ACCOUNT -->
-        <div id="authSectionRegister" style="display: none;">
-          <div class="admin-login-header">
-            <h1 class="admin-login-title">Create Admin Account</h1>
-            <p class="admin-login-subtitle">Register a new administrator with full permissions to manage training modules, quizzes, and factory operations.</p>
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" id="loginPassword" name="password" class="form-input" required value="${defaultPassword}" placeholder="••••••••" autocomplete="current-password" />
           </div>
 
-          <form id="adminRegisterForm" class="admin-login-form">
-            <div id="registerAlertBox" class="alert-box alert-danger" style="display: none;"></div>
-            <div id="registerSuccessBox" class="alert-box alert-success" style="display: none;"></div>
-
-            <div class="admin-role-badge-pill">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span>Privilege: System Administrator (Full CMS Access)</span>
-            </div>
-
-            <div class="form-group">
-              <label for="registerFullName" class="form-label">Full Name</label>
-              <input type="text" id="registerFullName" name="full_name" class="form-input" required placeholder="e.g. Alex Henderson" />
-            </div>
-
-            <div class="form-group">
-              <label for="registerEmail" class="form-label">Corporate Email</label>
-              <input type="email" id="registerEmail" name="email" class="form-input" required placeholder="name@fusionsole.com" autocomplete="username" />
-            </div>
-
-            <div class="form-group">
-              <label for="registerPassword" class="form-label">Password <span style="font-size: 0.75rem; color: #64748b;">(min 6 characters)</span></label>
-              <input type="password" id="registerPassword" name="password" class="form-input" required placeholder="••••••••" minlength="6" autocomplete="new-password" />
-            </div>
-
-            <div class="form-group">
-              <label for="registerConfirmPassword" class="form-label">Confirm Password</label>
-              <input type="password" id="registerConfirmPassword" name="confirm_password" class="form-input" required placeholder="••••••••" minlength="6" autocomplete="new-password" />
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block btn-lg" id="registerSubmitBtn">
-              Create Admin &amp; Sign In
-            </button>
-          </form>
-
-          <div style="margin-top: 16px; font-size: 0.8125rem; color: #64748b; text-align: center;">
-            Already have an account? <a href="#" id="switchToSignInLink" class="text-primary hover-underline font-semibold">Sign in here</a>
-          </div>
-        </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="loginSubmitBtn">
+            ${btnText}
+          </button>
+        </form>
 
         <div class="admin-login-footer">
           ${helperNotice}
