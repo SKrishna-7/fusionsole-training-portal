@@ -59,10 +59,10 @@ export const supabase = isLiveConfigured
 const INITIAL_CATEGORIES = [
   {
     id: 'cat-staff-01',
-    name: 'Staff',
+    name: 'Induction',
     slug: 'staff',
     description: 'An introduction to Fusionsole, the workplace environment, company practices and essential information for newly joined staff.',
-    image_path: '/images/fusion-moulds.jpg',
+    image_path: '/images/banner-induction.jpg',
     display_order: 1,
     is_active: true,
     created_at: '2026-11-01T08:00:00Z',
@@ -70,10 +70,10 @@ const INITIAL_CATEGORIES = [
   },
   {
     id: 'cat-workers-02',
-    name: 'Workers',
+    name: 'Workers training programe',
     slug: 'workers',
     description: 'Practical skill programmes covering manufacturing departments and footwear construction operations.',
-    image_path: '/images/fusion-stitching.jpg',
+    image_path: '/images/banner-workers.jpg',
     display_order: 2,
     is_active: true,
     created_at: '2026-11-01T08:00:00Z',
@@ -95,13 +95,25 @@ const INITIAL_SUBJECTS = [
     updated_at: '2026-11-01T08:00:00Z'
   },
   {
-    id: 'sub-assembly-02',
+    id: 'sub-lasting-04',
     category_id: 'cat-workers-02',
-    name: 'Assembly',
-    slug: 'assembly',
-    description: 'Learn about shoe shaping, lasting operations, sole bonding and the processes involved in forming the footwear structure.',
+    name: 'Lasting',
+    slug: 'lasting',
+    description: 'Learn about shoe shaping, upper pulling, precision lasting operations and forming the 3D anatomical footwear structure.',
     image_path: '/images/fusion-lasting.jpg',
     display_order: 2,
+    is_active: true,
+    created_at: '2026-11-01T08:00:00Z',
+    updated_at: '2026-11-01T08:00:00Z'
+  },
+  {
+    id: 'sub-assembly-02',
+    category_id: 'cat-workers-02',
+    name: 'Assembling',
+    slug: 'assembly',
+    description: 'Understand the operations involved in sole preparation, adhesive activation, sole attaching, inspection, and packaging.',
+    image_path: '/images/program-training.jpg',
+    display_order: 3,
     is_active: true,
     created_at: '2026-11-01T08:00:00Z',
     updated_at: '2026-11-01T08:00:00Z'
@@ -113,7 +125,7 @@ const INITIAL_SUBJECTS = [
     slug: 'cutting',
     description: 'An introduction to material preparation, cutting operations and the processes involved in preparing footwear components.',
     image_path: '/images/fusion-moulds.jpg',
-    display_order: 3,
+    display_order: 4,
     is_active: true,
     created_at: '2026-11-01T08:00:00Z',
     updated_at: '2026-11-01T08:00:00Z'
@@ -144,7 +156,7 @@ const INITIAL_MODULES = [
     ],
     youtube_url: 'https://www.youtube.com/watch?v=ysz5S6PUM-U',
     youtube_video_id: 'ysz5S6PUM-U',
-    thumbnail_path: '/images/fusion-moulds.jpg',
+    thumbnail_path: '/images/banner-induction.jpg',
     display_order: 1,
     status: 'draft',
     created_at: '2026-11-01T08:00:00Z',
@@ -170,7 +182,7 @@ const INITIAL_MODULES = [
     ],
     youtube_url: 'https://www.youtube.com/watch?v=ysz5S6PUM-U',
     youtube_video_id: 'ysz5S6PUM-U',
-    thumbnail_path: '/images/fusion-lasting.jpg',
+    thumbnail_path: '/images/banner-workers.jpg',
     display_order: 2,
     status: 'draft',
     created_at: '2026-11-01T08:00:00Z',
@@ -534,6 +546,52 @@ class LocalDatabaseStore {
               safeStorage.setItem(this.authKey, JSON.stringify(authUser));
             }
           } catch (e) {}
+        }
+
+        // Ensure categories use updated banners and names
+        if (this.data.categories) {
+          this.data.categories.forEach(c => {
+            if (c.slug === 'workers') {
+              c.name = 'Workers training programe';
+              c.image_path = '/images/banner-workers.jpg';
+            }
+            if (c.slug === 'staff') {
+              c.name = 'Induction';
+              c.image_path = '/images/banner-induction.jpg';
+            }
+          });
+          this.save();
+        }
+
+        // Ensure manufacturing subjects: purge any staff/worker induction and ensure Lasting & Assembling exist
+        if (this.data.subjects) {
+          this.data.subjects = this.data.subjects.filter(s => {
+            const name = (s.name || '').toLowerCase();
+            const slug = (s.slug || '').toLowerCase();
+            return !name.includes('induction') && !slug.includes('induction') && !name.includes('staff') && !slug.includes('staff');
+          });
+
+          if (!this.data.subjects.some(s => s.slug === 'lasting')) {
+            const lastingSub = INITIAL_SUBJECTS.find(s => s.slug === 'lasting');
+            if (lastingSub) this.data.subjects.push(lastingSub);
+          }
+
+          const assemSub = this.data.subjects.find(s => s.slug === 'assembly' || s.slug === 'assembling');
+          if (assemSub) {
+            assemSub.name = 'Assembling';
+            assemSub.slug = 'assembly';
+            assemSub.description = 'Understand the operations involved in sole preparation, adhesive activation, sole attaching, inspection, and packaging.';
+          }
+          this.save();
+        }
+
+        // Ensure induction module banners are updated
+        if (this.data.modules) {
+          const modStaff = this.data.modules.find(m => m.slug === 'staff-induction');
+          if (modStaff) modStaff.thumbnail_path = '/images/banner-induction.jpg';
+          const modWorker = this.data.modules.find(m => m.slug === 'worker-induction');
+          if (modWorker) modWorker.thumbnail_path = '/images/banner-workers.jpg';
+          this.save();
         }
 
         // Ensure worker-induction module & quiz exist in local storage
@@ -953,42 +1011,122 @@ export const dbService = {
 
   // --- SUBJECTS ---
   async getSubjects(onlyActive = false) {
+    let list = [];
     if (isLiveConfigured && supabase) {
-      let query = supabase.from('subjects').select('*, categories(name)').order('display_order', { ascending: true });
-      if (onlyActive) query = query.eq('is_active', true);
-      const { data, error } = await query;
-      if (error) {
-        console.error('Supabase getSubjects error:', error);
-        throw new Error('Failed to load subjects from Supabase: ' + error.message);
+      try {
+        let query = supabase.from('subjects').select('*, categories(name)').order('display_order', { ascending: true });
+        if (onlyActive) query = query.eq('is_active', true);
+        const { data, error } = await query;
+        if (!error && data) {
+          list = data.map(s => ({
+            ...s,
+            category_name: s.categories?.name || 'Unknown'
+          }));
+        }
+      } catch (e) {
+        console.warn('Supabase getSubjects fallback to local:', e);
       }
-      return (data || []).map(s => ({
-        ...s,
-        category_name: s.categories?.name || 'Unknown'
-      }));
     }
-    if (isProduction) {
-      throw new Error('Supabase cloud database is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Cloudflare Pages.');
+
+    if (!list || list.length === 0) {
+      if (isProduction && !localDb.data.subjects.length) {
+        throw new Error('Supabase cloud database is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in Cloudflare Pages.');
+      }
+      list = localDb.data.subjects.map(s => {
+        const cat = localDb.data.categories.find(c => c.id === s.category_id);
+        return { ...s, category_name: cat ? cat.name : 'Unknown' };
+      });
+      if (onlyActive) list = list.filter(s => s.is_active);
     }
-    let list = localDb.data.subjects.map(s => {
-      const cat = localDb.data.categories.find(c => c.id === s.category_id);
-      return { ...s, category_name: cat ? cat.name : 'Unknown' };
+
+    // Explicitly purge any accidental induction or staff entries from manufacturing subjects
+    list = list.filter(s => {
+      const name = (s.name || '').toLowerCase();
+      const slug = (s.slug || '').toLowerCase();
+      return !name.includes('induction') && !slug.includes('induction') && !name.includes('staff') && !slug.includes('staff');
     });
-    if (onlyActive) list = list.filter(s => s.is_active);
-    return list.sort((a, b) => a.display_order - b.display_order);
+
+    // Ensure Lasting exists in returned subjects
+    if (!list.some(s => s.slug === 'lasting')) {
+      list.push({
+        id: 'sub-lasting-04',
+        category_id: 'cat-workers-02',
+        name: 'Lasting',
+        slug: 'lasting',
+        description: 'Learn about shoe shaping, upper pulling, precision lasting operations and forming the 3D anatomical footwear structure.',
+        image_path: '/images/fusion-lasting.jpg',
+        display_order: 2,
+        is_active: true
+      });
+    }
+
+    return list.sort((a, b) => (a.display_order || 1) - (b.display_order || 1));
   },
 
   async getSubjectBySlug(slug) {
-    if (isLiveConfigured && supabase) {
-      const { data, error } = await supabase.from('subjects').select('*, categories(*)').eq('slug', slug).single();
-      if (error && error.code !== 'PGRST116') {
-        throw new Error('Failed to load subject from Supabase: ' + error.message);
+    const cleanSlug = (slug || '').toLowerCase().trim();
+
+    // Check specific lasting handling
+    if (cleanSlug === 'lasting') {
+      let found = null;
+      if (isLiveConfigured && supabase) {
+        try {
+          const { data } = await supabase.from('subjects').select('*, categories(*)').eq('slug', 'lasting').single();
+          if (data) found = data;
+        } catch (e) {}
       }
-      return data || null;
+      if (!found) {
+        found = localDb.data.subjects.find(s => s.slug === 'lasting');
+      }
+      if (!found) {
+        found = {
+          id: 'sub-lasting-04',
+          category_id: 'cat-workers-02',
+          name: 'Lasting',
+          slug: 'lasting',
+          description: 'Learn about shoe shaping, upper pulling, precision lasting operations and forming the 3D anatomical footwear structure.',
+          image_path: '/images/fusion-lasting.jpg',
+          display_order: 2,
+          is_active: true
+        };
+      }
+      return found;
     }
-    if (isProduction) {
-      throw new Error('Supabase cloud database is not configured in production.');
+
+    // Check assembling / assembly
+    if (cleanSlug === 'assembling' || cleanSlug === 'assembly') {
+      let found = null;
+      if (isLiveConfigured && supabase) {
+        try {
+          const { data } = await supabase.from('subjects').select('*, categories(*)').in('slug', ['assembly', 'assembling']).limit(1).single();
+          if (data) found = data;
+        } catch (e) {}
+      }
+      if (!found) {
+        found = localDb.data.subjects.find(s => s.slug === 'assembly' || s.slug === 'assembling');
+      }
+      if (!found) {
+        found = {
+          id: 'sub-assembly-02',
+          category_id: 'cat-workers-02',
+          name: 'Assembling',
+          slug: 'assembly',
+          description: 'Understand the operations involved in sole preparation, adhesive activation, sole attaching, inspection, and packaging.',
+          image_path: '/images/program-training.jpg',
+          display_order: 3,
+          is_active: true
+        };
+      }
+      return { ...found, name: 'Assembling', slug: 'assembly' };
     }
-    return localDb.data.subjects.find(s => s.slug === slug) || null;
+
+    if (isLiveConfigured && supabase) {
+      try {
+        const { data, error } = await supabase.from('subjects').select('*, categories(*)').eq('slug', cleanSlug).single();
+        if (!error && data) return data;
+      } catch (err) {}
+    }
+    return localDb.data.subjects.find(s => s.slug === cleanSlug) || null;
   },
 
   async saveSubject(subjectData) {

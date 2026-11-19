@@ -38,22 +38,22 @@ export function renderLearningCenterPage(categories = null) {
   // Fallback if categories not yet fetched
   const cats = categories || [
     {
-      name: 'Staff',
+      name: 'Induction',
       slug: 'staff',
-      description: 'Get introduced to Fusionsole, understand the workplace environment and learn the essential information needed to begin your journey with the company.',
-      image_path: '/images/fusion-moulds.jpg',
+      description: 'An introduction to Fusionsole, the workplace environment, company practices and essential information for newly joined staff.',
+      image_path: '/images/banner-induction.png',
       badge: 'STAFF & WORKER INDUCTION',
       meta: '2 Core Modules',
       tags: ['Staff Induction', 'Worker Induction', 'Workplace Safety']
     },
     {
-      name: 'Workers',
+      name: 'Workers training programe',
       slug: 'workers',
-      description: 'Explore footwear manufacturing processes and understand the different operations involved in producing quality footwear.',
-      image_path: '/images/fusion-stitching.jpg',
+      description: 'Practical skill programmes covering manufacturing departments: stitching, lasting, and assembling.',
+      image_path: '/images/banner-workers.png',
       badge: 'MANUFACTURING TRAINING',
-      meta: '27 Total Modules · 3 Departments',
-      tags: ['Stitching', 'Assembly', 'Cutting']
+      meta: '25 Total Modules · 3 Departments',
+      tags: ['Stitching', 'Lasting', 'Assembling']
     }
   ];
 
@@ -64,11 +64,13 @@ export function renderLearningCenterPage(categories = null) {
     const badgeClass = isStaff ? 'tag-blue' : 'tag-green';
     const targetUrl = `/learning/${cat.slug}`;
     const btnLabel = isStaff ? 'Explore Induction' : 'Explore Training';
+    const catName = isStaff ? (cat.name === 'Staff' ? 'Induction' : cat.name) : 'Workers training programe';
+    const bannerImg = isStaff ? '/images/banner-induction.jpg' : '/images/banner-workers.jpg';
 
     return `
       <article class="category-editorial-card">
         <div class="category-card-media">
-          <img src="${cat.image_path || '/images/fusion-moulds.jpg'}" alt="${cat.name} learning programme" loading="lazy" />
+          <img src="${bannerImg}" alt="${catName} learning programme" loading="lazy" />
           <div class="category-card-badge">
             <span class="tag ${badgeClass}">${badgeText}</span>
           </div>
@@ -78,14 +80,14 @@ export function renderLearningCenterPage(categories = null) {
             <span class="category-index-num">CATEGORY ${numStr}</span>
             <span class="category-duration">${isStaff ? '2 Core Modules' : '3 Manufacturing Departments'}</span>
           </div>
-          <h2 class="category-card-title">${cat.name}</h2>
+          <h2 class="category-card-title">${catName}</h2>
           <p class="category-card-text">
             ${cat.description || 'Explore learning programmes and workplace operational standards.'}
           </p>
           <div class="category-preview-tags">
             ${isStaff 
               ? '<span class="preview-tag">Staff Induction</span><span class="preview-tag">Worker Induction</span><span class="preview-tag">Workplace Safety</span>'
-              : '<span class="preview-tag">Stitching</span><span class="preview-tag">Assembly</span><span class="preview-tag">Cutting</span>'}
+              : '<span class="preview-tag">Stitching</span><span class="preview-tag">Lasting</span><span class="preview-tag">Assembling</span>'}
           </div>
           <div class="category-card-action">
             <a href="${targetUrl}" class="btn btn-primary category-btn">
@@ -161,7 +163,7 @@ export function renderStaffLandingPage(modulesList = null) {
   const cardsHtml = fullModules.map((mod, idx) => {
     const numStr = String(mod.display_order || idx + 1).padStart(2, '0');
     const isWorker = mod.slug === 'worker-induction';
-    const imagePath = mod.thumbnail_path || (isWorker ? '/images/fusion-lasting.jpg' : '/images/fusion-moulds.jpg');
+    const imagePath = isWorker ? '/images/banner-workers.png' : '/images/banner-induction.png';
     const modTitle = mod.title || (isWorker ? 'Worker Induction' : 'Staff Induction');
     const modDesc = mod.description || mod.shortDesc || (isWorker 
       ? 'Essential orientation for production floor personnel covering shop floor safety, PPE protocols, machine zone awareness, and quality reporting.'
@@ -261,32 +263,60 @@ export function renderWorkersLandingPage(subjectsList = null) {
     {
       slug: 'stitching',
       name: 'Stitching',
-      description: 'Understand the stitching processes, operations and techniques involved in footwear manufacturing.',
+      description: 'Understand the stitching processes, operations, equipment and techniques involved in footwear upper manufacturing.',
       image_path: '/images/fusion-stitching.jpg',
-      preview: ['S/N Stitching', 'D/N Stitching', 'C/S Stitching', '+3 more']
+      preview: ['S/N Stitching', 'D/N Stitching', 'C/S Stitching', 'Binding Stitching', 'Zig Zag', 'Flat Stitching']
+    },
+    {
+      slug: 'lasting',
+      name: 'Lasting',
+      description: 'Learn about shoe shaping, upper pulling, precision lasting operations and forming the 3D anatomical footwear structure.',
+      image_path: '/images/fusion-lasting.jpg',
+      preview: ['Counter Moulding', 'Stroble Stitching', 'Lasting', 'Lace', 'Seed Lasting', 'D Lasting']
     },
     {
       slug: 'assembly',
-      name: 'Assembly',
-      description: 'Understand the operations involved in shaping, assembling, finishing and preparing footwear products.',
-      image_path: '/images/fusion-lasting.jpg',
-      preview: ['Counter Moulding', 'Lasting', 'Sole Attaching', '+16 more']
-    },
-    {
-      slug: 'cutting',
-      name: 'Cutting',
-      description: 'Learn about the initial material cutting operations involved in preparing footwear components.',
-      image_path: '/images/fusion-moulds.jpg',
-      preview: ['Beam Cutting', 'Normal Cutting']
+      name: 'Assembling',
+      description: 'Understand the operations involved in component roughing, adhesive coating, sole attaching, quality checking and retail packing.',
+      image_path: '/images/program-training.jpg',
+      preview: ['Roufing', 'Sole Pasting', 'Sole Attaching', 'Edge Cleaning', 'Checking', 'Packing (+7 more)']
     }
   ];
 
-  const subs = subjectsList || defaultSubs;
+  // Strictly filter out any Staff or Induction items, and keep ONLY Stitching, Lasting, Assembling
+  let rawList = Array.isArray(subjectsList) && subjectsList.length > 0 ? subjectsList : defaultSubs;
+  
+  // Filter out any induction or staff entries
+  rawList = rawList.filter(s => {
+    const name = (s.name || '').toLowerCase();
+    const slug = (s.slug || '').toLowerCase();
+    return !name.includes('induction') && !slug.includes('induction') && !name.includes('staff') && !slug.includes('staff');
+  });
 
-  const subjectsHtml = subs.map((sub, idx) => {
+  // Target exactly the 3 departments requested: stitching, lasting, assembling
+  const targetSlugs = ['stitching', 'lasting', 'assembly', 'assembling'];
+  let subs = rawList.filter(s => targetSlugs.includes(s.slug.toLowerCase()) || targetSlugs.some(t => s.name.toLowerCase().includes(t)));
+
+  const finalSubs = [];
+  // 1. Stitching
+  const stitchItem = subs.find(s => s.slug === 'stitching' || s.name.toLowerCase().includes('stitching'));
+  finalSubs.push(stitchItem ? { ...defaultSubs[0], ...stitchItem, name: 'Stitching', slug: 'stitching' } : defaultSubs[0]);
+
+  // 2. Lasting
+  const lastingItem = subs.find(s => s.slug === 'lasting' || s.name.toLowerCase().includes('lasting'));
+  finalSubs.push(lastingItem ? { ...defaultSubs[1], ...lastingItem, name: 'Lasting', slug: 'lasting' } : defaultSubs[1]);
+
+  // 3. Assembling
+  const assemItem = subs.find(s => s.slug === 'assembly' || s.slug === 'assembling' || s.name.toLowerCase().includes('assembl'));
+  finalSubs.push(assemItem ? { ...defaultSubs[2], ...assemItem, name: 'Assembling', slug: 'assembly' } : defaultSubs[2]);
+
+  const subjectsHtml = finalSubs.map((sub, idx) => {
     const numStr = String(idx + 1).padStart(2, '0');
     const isReverse = idx % 2 === 1 ? 'subject-row-reverse' : '';
     const linkUrl = `/learning/workers/${sub.slug}`;
+    const chipsHtml = (sub.preview || ['Core Process', 'SOP & Safety', 'Quality Check']).slice(0, 3).map(chip => `
+      <span class="chip">${chip}</span>
+    `).join('');
 
     return `
       <article class="subject-editorial-row ${isReverse}">
@@ -302,9 +332,7 @@ export function renderWorkersLandingPage(subjectsList = null) {
           <div class="subject-processes-preview">
             <span class="preview-label">Operations:</span>
             <div class="preview-chips-row">
-              <span class="chip">${sub.name} Core Process</span>
-              <span class="chip">SOP &amp; Safety</span>
-              <span class="chip">Quality Check</span>
+              ${chipsHtml}
             </div>
           </div>
           <div class="subject-row-action">

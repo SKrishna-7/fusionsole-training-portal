@@ -12,7 +12,7 @@ export const subjectsData = {
     badge: 'STAFF & WORKER INDUCTION',
     headline: 'Staff & Worker Induction',
     description: 'An introduction to Fusionsole, the workplace environment, company practices and essential safety information for newly joined staff and production workers.',
-    image: '/images/fusion-moulds.jpg',
+    image: '/images/banner-induction.png',
     modulesCount: 2,
     previewItems: ['Staff Induction', 'Worker Induction', 'Workplace Safety & Standards'],
     modules: [

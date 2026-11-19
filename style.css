@@ -1173,24 +1173,31 @@ button {
   position: relative;
   height: 260px;
   overflow: hidden;
-  background-color: #e4e7ec;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .category-card-media img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  display: block;
   transition: transform 0.4s ease;
 }
 
 .category-editorial-card:hover .category-card-media img {
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
 .category-card-badge {
   position: absolute;
-  top: 18px;
-  left: 18px;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
 }
 
 .category-card-body {
@@ -1279,20 +1286,30 @@ button {
 
 .spotlight-card {
   display: grid;
-  grid-template-columns: 460px 1fr;
-  align-items: stretch;
+  grid-template-columns: minmax(460px, 48%) 1fr;
+  align-items: center;
 }
 
 .spotlight-media {
   position: relative;
-  background-color: #e4e7ec;
+  background-color: #ffffff;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  height: 100%;
+  min-height: 260px;
 }
 
 .spotlight-media img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 6px;
+  display: block;
 }
 
 .spotlight-video-badge {
@@ -1312,7 +1329,7 @@ button {
 }
 
 .spotlight-content {
-  padding: 44px;
+  padding: 36px 40px;
   display: flex;
   flex-direction: column;
 }

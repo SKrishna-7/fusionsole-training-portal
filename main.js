@@ -410,7 +410,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       const subjectSlug = subParts[1];
       const subject = await dbService.getSubjectBySlug(subjectSlug);
       if (subject) {
-        const modules = await dbService.getModules({ subjectId: subject.id, status: 'published' });
+        let modules = await dbService.getModules({ subjectId: subject.id, status: 'published' });
+        if (!modules || modules.length === 0) {
+          modules = await dbService.getModules({ subjectId: subject.id });
+        }
+        if (subjectSlug === 'lasting') {
+          const lastingSlugs = ['counter-moulding', 'stroble-stitching', 'lasting', 'lace', 'seed-lasting', 'marking', 'd-lasting'];
+          if (!modules || modules.length === 0) {
+            modules = (subjectsData.assembly?.modules || []).filter(m => lastingSlugs.includes(m.slug));
+          } else {
+            const lastingMods = modules.filter(m => lastingSlugs.includes(m.slug));
+            if (lastingMods.length > 0) modules = lastingMods;
+          }
+        } else if (subjectSlug === 'assembly' || subjectSlug === 'assembling') {
+          const assemSlugs = ['roufing', 'sole-wash', 'upper-wash', 'sole-pasting', 'upper-pasting', 'sole-attaching', 'edge-cleaning', 'stuffing', 'socks-inserting', 'checking', 'packing', 'foxing'];
+          if (!modules || modules.length === 0) {
+            modules = (subjectsData.assembly?.modules || []).filter(m => assemSlugs.includes(m.slug));
+          } else {
+            const assemMods = modules.filter(m => assemSlugs.includes(m.slug));
+            if (assemMods.length > 0) modules = assemMods;
+          }
+        }
         learningView.innerHTML = renderSubjectDetailPage(subject, modules);
         document.title = `${subject.name} Department Modules · Fusionsole`;
       } else {
@@ -423,8 +443,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (subParts.length === 3 && subParts[0] === 'workers') {
       const subjectSlug = subParts[1];
       const moduleSlug = subParts[2];
-      const subject = await dbService.getSubjectBySlug(subjectSlug);
-      const moduleData = await dbService.getModuleBySlug(moduleSlug);
+      let subject = await dbService.getSubjectBySlug(subjectSlug);
+      let moduleData = await dbService.getModuleBySlug(moduleSlug);
+
+      if (!subject && (subjectSlug === 'lasting' || subjectSlug === 'assembling')) {
+        subject = await dbService.getSubjectBySlug('assembly');
+      }
+      if (!moduleData && typeof subjectsData === 'object') {
+        for (const catKey of Object.keys(subjectsData)) {
+          const found = subjectsData[catKey].modules?.find(m => m.slug === moduleSlug);
+          if (found) { moduleData = found; break; }
+        }
+      }
 
       if (subject && moduleData) {
         let quizData = null;
